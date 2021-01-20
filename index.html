@@ -50,6 +50,7 @@
 					    	<input class="form-control" type="number" value="6" disabled="disabled">
 					    </li>
 					    <li class="list-group-item" style="text-align: right;">
+					    	<button onclick="ayarlariSifirla()" id="ayarlari_sifirla" class="btn btn-sm btn-danger">AYARLARI SIFIRLA</button>
 					    	<button onclick="ayarlariKaydet()" id="ayarlar_kaydet" class="btn btn-sm btn-success">KAYDET</button>
 					    </li>
 					    <!-- <li class="list-group-item"></li> -->
@@ -173,11 +174,22 @@
 		var ISLEM_GECMISI 		= [];
 		var BAKIYE 						= [2000, 0.0032];
 		var BAKIYE_FIAT       = 2000;
-		var BAKIYE_BTC        = 0.0032;
+		var BAKIYE_BTC        = 0.0075;
 		var klines 						= `https://api.binance.com/api/v3/klines?symbol=${SYMBOL_UPPERCASE}&interval=1m&limit=30`;
 
 		window.onload = function(){
 			ayarlariUygula();
+		}
+
+		function ayarlariSifirla(){
+			localStorage.removeItem("ayar_bakiye_fiat");
+			localStorage.removeItem("ayar_bakiye_btc");
+			localStorage.removeItem("ayar_islem_hacim");
+			localStorage.removeItem("ayar_oran");
+			document.querySelector("#ayarlari_sifirla").innerHTML = "SIFIRLANDI...";
+			setTimeout(()=>{
+				document.querySelector("#ayarlari_sifirla").innerHTML = "AYARLARI SIFIRLA";
+			}, 1000)
 		}
 		
 		function ayarlariUygula(){
@@ -281,6 +293,12 @@
         },
         plotOptions : {
         	candlestick : {
+        		color           : "#da1d2e",
+            lineColor       : '#da1d2e',
+            upColor         : '#1ab131',
+            upLineColor     : '#1ab131',
+            animation       : true,
+            stickyTracking  : true,
         		dataGrouping : {
         			enabled : false
         		}
