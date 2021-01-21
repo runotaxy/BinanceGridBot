@@ -588,11 +588,7 @@
 		}
 
 		function karZararHesapla(){
-			console.log(BAKIYE[0]);
-			console.log(BAKIYE[1]);
-			console.log(LAST_PRICE);
 			var karzarar = BAKIYE[2] - (parseFloat(BAKIYE[0]) + parseFloat(BAKIYE[1]) * LAST_PRICE);
-			console.log(karzarar);
 			document.querySelector("#karZarar").innerHTML = karzarar;
 		}
 	</script>
