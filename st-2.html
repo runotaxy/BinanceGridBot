@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>2 Binance Grid BOT</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://code.highcharts.com/css/stocktools/gui.css">
+	<link rel="stylesheet" type="text/css" href="https://code.highcharts.com/css/annotations/popup.css">
+</head>
+<body>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-2">
+				<div class="card">
+					<div class="card-header">
+				    AYARLAR
+				  </div>
+				  <div class="card-body" style="padding:0px; padding-bottom:1rem;">
+			    	<ul class="list-group list-group-flush">
+					    <li class="list-group-item">
+					    	<strong>Bot Durumu</strong>
+								<select name="" id="" class="form-control" disabled="disabled">
+									<option value="1">AÇIK</option>
+									<option value="0">KAPALI</option>
+								</select>
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>İŞLEM HACMİ</strong>
+					    	<br>
+					    	<input class="form-control" id="ayarlar_islem_hacmi" type="number" value="">
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>ORAN</strong>
+					    	<br>
+					    	<input class="form-control" id="ayarlar_oran" type="number" value="">
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>SEMBOL</strong>
+					    	<br>
+					    	<select name="" id="" class="form-control" disabled="disabled">
+									<option value="btctry">BTC/TRY</option>
+									<option value="btcusdt">BTC/USDT</option>
+								</select>
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>TOPLAM AÇIK EMİR</strong>
+					    	<br>
+					    	<input class="form-control" type="number" value="6" disabled="disabled">
+					    </li>
+					    <li class="list-group-item" style="text-align: right;">
+					    	<button onclick="ayarlariSifirla()" id="ayarlari_sifirla" class="btn btn-sm btn-danger">AYARLARI SIFIRLA</button>
+					    	<button onclick="ayarlariKaydet()" id="ayarlar_kaydet" class="btn btn-sm btn-success">KAYDET</button>
+					    </li>
+					    <!-- <li class="list-group-item"></li> -->
+					  </ul>
+			    </div>
+				</div>
+				<br>
+
+				<div class="card">
+					<div class="card-header">
+				    BAKIYE
+				  </div>
+				  <div class="card-body" style="padding:0px; padding-bottom:1rem;">
+			    	<ul class="list-group list-group-flush">
+					    <li class="list-group-item">
+					    	<strong>AÇILIŞ BAKİYESİ</strong>
+								<br>
+								<div class="row">
+									<div class="col-sm-6">
+										<strong><span id="ayarlar_acilis_bakiyesi_fiat">...</span>TL</strong>		
+									</div>
+									<div class="col-sm-6">
+										<strong><span id="ayarlar_acilis_bakiyesi_btc">...</span>BTC</strong>
+									</div>
+								</div>
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>GÜNCEL BAKİYE</strong>
+					    	<br>
+					    	<div class="row">
+									<div class="col-sm-6">
+										<strong><span id="guncel_bakiye_fiat">...</span>TL</strong>		
+									</div>
+									<div class="col-sm-6">
+										<strong><span id="guncel_bakiye_btc">...</span>BTC</strong>
+									</div>
+								</div>
+								<br>
+					    </li>
+					    <li class="list-group-item">
+					    	<strong>KAR / ZARAR</strong>
+					    	<br>
+					    	<div class="row">
+									<div class="col-sm-12">
+										<strong><span id="karZarar">...</span>TL</strong>		
+									</div>
+								</div>
+								<br>
+					    </li>
+					  </ul>
+			    </div>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="card" style="height:100vh;">
+					<div class="card-header">
+				    İŞLEM GEÇMİŞİ 
+				    (<span id="islem_gecmisi_total">0</span>)
+				    <span style="color:green;">(<span id="islem_gecmisi_buy">0</span>)</span>
+				    <span style="color:red;">(<span id="islem_gecmisi_sell">0</span>)</span>
+				  </div>
+					<div class="card-body" style="padding:0px; padding-bottom:1rem;">
+			    	<ul class="list-group list-group-flush">
+					    <li class="list-group-item">
+					    	<div class="table_wrapper" style="overflow: hidden; overflow-y:auto; max-height: calc(100vh - 70px);">
+						    	<table id="islem_gecmisi_list" class="table table-sm table-bordered">
+										<thead>
+											<tr>
+												<th>Zaman</th>
+												<th>Rakam</th>
+												<th>Tutar</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+					    </li>
+					  </ul>
+			    </div>
+		    </div>
+			</div>
+			<div class="col-sm-8">
+				<div id="container" class="chart" style="height:100vh;"></div>
+			</div>
+		</div>
+	</div>
+
+
+	<style>
+		body {
+			background:#f2f2f2;
+			font-size: 12px;
+		}
+		.flexRow {
+			display: flex;
+		}
+
+		.settingsSide {
+			width: 15%;
+			background:rgba(0,0,0,.1);
+		}
+
+		.chartSide {
+			width: 65%;
+		}
+
+		.tableSide {
+			width: 20%;
+			background:rgba(0,0,0,.1);
+		}
+	</style>
+
+
+	<script src="https://code.highcharts.com/stock/highstock.js"></script>
+	<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+	<script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+	<script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+	<script src="https://code.highcharts.com/modules/annotations-advanced.js"></script>
+	<script src="https://code.highcharts.com/modules/price-indicator.js"></script>
+	<script src="https://code.highcharts.com/modules/full-screen.js"></script>
+	<script src="https://code.highcharts.com/modules/stock-tools.js"></script>
+
+	<script>
+		// SETTINGS
+		var ISLEM_HACIM 			= 0.0001;
+		var ORAN 							= 0.05;
+		var SYMBOL 						= "btctry";
+		var SYMBOL_UPPERCASE 	= SYMBOL.toUpperCase();
+		var DATAYI_ISLE 			= false;
+		var ACIK_EMIRLER 			= null;
+		var ISLEM_GECMISI 		= [];
+		var BAKIYE_FIAT       = 2000;
+		var BAKIYE_BTC        = 0.008398;
+		var BAKIYE 						= [BAKIYE_FIAT, BAKIYE_BTC];
+		var klines 						= `https://api.binance.com/api/v3/klines?symbol=${SYMBOL_UPPERCASE}&interval=1m&limit=30`;
+
+		window.onload = function(){
+			ayarlariUygula();
+		}
+
+		function ayarlariSifirla(){
+			localStorage.removeItem("ayar_bakiye_fiat");
+			localStorage.removeItem("ayar_bakiye_btc");
+			localStorage.removeItem("ayar_islem_hacim");
+			localStorage.removeItem("ayar_oran");
+			document.querySelector("#ayarlari_sifirla").innerHTML = "SIFIRLANDI...";
+			setTimeout(()=>{
+				document.querySelector("#ayarlari_sifirla").innerHTML = "AYARLARI SIFIRLA";
+			}, 1000)
+		}
+		
+		function ayarlariUygula(){
+			if(localStorage.getItem("ayar_bakiye_fiat")){
+				document.querySelector("#ayarlar_acilis_bakiyesi_fiat").innerHTML = localStorage.getItem("ayar_bakiye_fiat");
+				BAKIYE_FIAT = parseFloat(localStorage.getItem("ayar_bakiye_fiat"));
+			}else{
+				document.querySelector("#ayarlar_acilis_bakiyesi_fiat").innerHTML = BAKIYE_FIAT;
+				localStorage.setItem("ayar_bakiye_fiat", BAKIYE_FIAT);
+			}
+
+			if(localStorage.getItem("ayar_bakiye_btc")){
+				document.querySelector("#ayarlar_acilis_bakiyesi_btc").innerHTML = localStorage.getItem("ayar_bakiye_btc");
+				BAKIYE_BTC = parseFloat(localStorage.getItem("ayar_bakiye_btc"));
+			}else{
+				document.querySelector("#ayarlar_acilis_bakiyesi_btc").innerHTML = BAKIYE_BTC;
+				localStorage.setItem("ayar_bakiye_btc", BAKIYE_BTC);
+			}
+
+			if(localStorage.getItem("ayar_islem_hacim")){
+				document.querySelector("#ayarlar_islem_hacmi").value = localStorage.getItem("ayar_islem_hacim");
+				ISLEM_HACIM = parseFloat(localStorage.getItem("ayar_islem_hacim"));
+			}else{
+				document.querySelector("#ayarlar_islem_hacmi").value = ISLEM_HACIM;
+				localStorage.setItem("ayar_islem_hacim", ISLEM_HACIM);
+			}
+
+			if(localStorage.getItem("ayar_oran")){
+				document.querySelector("#ayarlar_oran").value = localStorage.getItem("ayar_oran");
+				ORAN = parseFloat(localStorage.getItem("ayar_oran"));
+			}else{
+				document.querySelector("#ayarlar_oran").value = ORAN;
+				localStorage.setItem("ayar_oran", ORAN);
+			}
+
+		}
+		function ayarlariKaydet(){
+			localStorage.setItem("ayar_bakiye_fiat", parseFloat(document.querySelector("#ayarlar_acilis_bakiyesi_fiat").innerHTML));
+			localStorage.setItem("ayar_bakiye_btc", parseFloat(document.querySelector("#ayarlar_acilis_bakiyesi_btc").innerHTML));
+			localStorage.setItem("ayar_islem_hacim", document.querySelector("#ayarlar_islem_hacmi").value);
+			localStorage.setItem("ayar_oran", document.querySelector("#ayarlar_oran").value);
+			ISLEM_HACIM 			= document.querySelector("#ayarlar_islem_hacmi").value;
+			ORAN 							= document.querySelector("#ayarlar_oran").value;
+			document.querySelector("#ayarlar_kaydet").innerHTML = "KAYDEDİLDİ...";
+			setTimeout(()=>{
+				document.querySelector("#ayarlar_kaydet").innerHTML = "KAYDET";
+			}, 1000)
+		}
+
+		Highcharts.getJSON(klines, function (data) {
+	    var ohlc = [],
+	        volume = [],
+	        dataLength = data.length,
+	        i = 0;
+
+	    for (i; i < dataLength; i += 1) {
+        ohlc.push([
+            data[i][6] + 10800000, // the date
+            parseFloat(data[i][1]), // open
+            parseFloat(data[i][2]), // high
+            parseFloat(data[i][3]), // low
+            parseFloat(data[i][4]) // close
+        ]);
+
+        volume.push([
+            data[i][6] + 10800000, // the date
+            parseFloat(data[i][5]) // the volume
+        ]);
+	    }
+
+	    Highcharts.stockChart('container', {
+	    	credits : {enabled:false},
+        yAxis: [{
+          labels: {
+            align: 'left',
+          },
+          height: '100%',
+          resize: {
+            enabled: true
+          },
+        }, 
+        // VOLUME
+        // {
+        //   labels: {
+        //       align: 'left'
+        //   },
+        //   top: '80%',
+        //   height: '20%',
+        //   offset: 0
+        // }
+        ],
+        xAxis : [{
+        	
+        }],
+        chart : {
+        	events : {
+        		render : function(){
+        			DATAYI_ISLE = true;
+        		}
+        	}
+        },
+        plotOptions : {
+        	candlestick : {
+        		color           : "#da1d2e",
+            lineColor       : '#da1d2e',
+            upColor         : '#1ab131',
+            upLineColor     : '#1ab131',
+            animation       : true,
+            stickyTracking  : true,
+        		dataGrouping : {
+        			enabled : false
+        		}
+        	}
+        },
+        navigator : {enabled : false},
+        tooltip: {
+          shape: 'square',
+          headerShape: 'callout',
+          borderWidth: 0,
+          shadow: false,
+          positioner: function (width, height, point) {
+            var chart = this.chart,
+            position;
+            if (point.isHeader) {
+              position = {
+                x: Math.max(
+                chart.plotLeft,
+                Math.min(
+                  point.plotX + chart.plotLeft - width / 2,
+                  chart.chartWidth - width - chart.marginRight
+                	)
+              	),
+                y: point.plotY
+              };
+            } else {
+              position = {
+                x: point.series.chart.plotLeft,
+                y: point.series.yAxis.top - chart.plotTop
+              };
+            }
+            return position;
+          }
+        },
+        series: [{
+          type: 'candlestick',
+          id: 'btctry-ohlc',
+          name: 'BTCTRY Price',
+          data: ohlc,
+          // line
+          lastPrice: {
+            enabled: true,
+            color: 'orange',
+          },
+          // label
+          label : {
+          	backgroundColor : "black",
+          		color : "red",
+          	style : {
+          		backgroundColor : "black",
+          		color : "red"
+          	}
+          },
+          lastVisiblePrice: {
+            enabled: true,
+            color:"black",
+            label: {
+              enabled: true,
+	              style :{
+	            	fontSize : 10
+	            }
+            },
+          },
+        }, 
+        // {
+        //     type: 'column',
+        //     id: 'btctry-volume',
+        //     name: 'BTCTRY Volume',
+        //     data: volume,
+        //     yAxis: 1
+        // }
+        ],
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 800
+                },
+                chartOptions: {
+                    rangeSelector: {
+                        inputEnabled: false
+                    }
+                }
+            }]
+	        }
+	    });
+		});
+
+		var LAST_PRICE = 0;
+		var binanceSocketUrl  = `wss://stream.binance.com:9443/stream?streams=${SYMBOL}@ticker`;
+		let socket = new WebSocket(binanceSocketUrl);
+		socket.onopen = function(e) {
+		  console.log("Binance sockete baglanildi");
+		};
+
+		socket.onmessage = function(data) {
+			var data = JSON.parse(data.data);
+			var data = data.data;
+			if(DATAYI_ISLE == true){
+				handle_data(data);
+				if(ACIK_EMIRLER != null){
+					handle_emirler();
+				}
+			}
+			// console.log(`last price : ${data.c}, time : ${data.E}`);
+		};
+
+		socket.onclose = function(event) {
+		  console.log("Socket baglantisi sonlandirildi");
+		};
+
+		socket.onerror = function(error) {
+		  console.log("Sockette bir problem olustu");
+		};
+
+		function handle_data(data){
+			
+			var LAST_BAR_TIME = Highcharts.charts[0].series[0].data[Highcharts.charts[0].series[0].data.length - 1].x;
+			if(LAST_PRICE == parseFloat(data.c)){ return; }
+			LAST_PRICE = parseFloat(data.c);
+			
+			if((data.E + 10800000 ) <= LAST_BAR_TIME){
+				var lastBar = Highcharts.charts[0].series[0].data[Highcharts.charts[0].series[0].data.length - 1];
+				var newClose = parseFloat(data.c);
+					var updateData = {
+						"close" : newClose,
+						"high" : (newClose >= lastBar.high) ? newClose : lastBar.high,
+						"low" : (newClose <= lastBar.low) ? newClose : lastBar.low,
+					};
+				lastBar.update(updateData, true, true);
+			}else{
+				Highcharts.charts[0].series[0].addPoint([
+					LAST_BAR_TIME + 60000,
+					parseFloat(data.c),
+					parseFloat(data.c),
+					parseFloat(data.c),
+					parseFloat(data.c),
+				], true, true);
+				if(ACIK_EMIRLER == null){
+					// YENI BASLANGIC ICIN EMIRLERI OLUSTUR..
+					grid_emirlerini_olustur();
+				}
+			}
+		}
+
+		function grid_emirlerini_olustur(){
+			var buy_1 = LAST_PRICE - ((LAST_PRICE / 100) * ORAN);
+			var buy_2 = buy_1 - ((buy_1 / 100) * ORAN);
+			var buy_3 = buy_2 - ((buy_2 / 100) * ORAN);
+
+			var sell_1 = LAST_PRICE + ((LAST_PRICE / 100) * ORAN);
+			var sell_2 = sell_1 + ((sell_1 / 100) * ORAN);
+			var sell_3 = sell_2 + ((sell_2 / 100) * ORAN);
+
+			ACIK_EMIRLER = [sell_3, sell_2, sell_1, buy_1, buy_2, buy_3];
+
+			// SATISLAR
+	    Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'red',
+	      width: 2,
+	      value: sell_1,
+	      id : "sell_1"
+	    });
+			Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'red',
+	      width: 2,
+	      value: sell_2,
+	      id : "sell_2"
+	    });
+			Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'red',
+	      width: 2,
+	      value: sell_3,
+	      id : "sell_3"
+	    });
+
+			// ALISLAR
+			Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'green',
+	      width: 2,
+	      value: buy_1,
+	      id : "buy_1"
+	    });
+			Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'green',
+	      width: 2,
+	      value: buy_2,
+	      id : "buy_2"
+	    });
+			Highcharts.charts[0].yAxis[0].addPlotLine({
+	      color: 'green',
+	      width: 2,
+	      value: buy_3,
+	      id : "buy_3"
+	    });
+
+			
+		}
+
+		function handle_emirler(){
+			if(LAST_PRICE >= ACIK_EMIRLER[2]){
+				logger("SELL", LAST_PRICE);
+				tum_emirleri_iptal_et();
+				grid_emirlerini_olustur();
+			}
+			if(LAST_PRICE <= ACIK_EMIRLER[3]){
+				logger("BUY", LAST_PRICE);
+				tum_emirleri_iptal_et();
+				grid_emirlerini_olustur();
+			}
+		}
+
+		function bakiyeGuncelle(type, price){
+			switch(type){
+				case "BUY":
+					BAKIYE[0] = parseFloat(parseFloat(BAKIYE[0]) - (ISLEM_HACIM * price)).toFixed(2);
+					BAKIYE[1] = (parseFloat(BAKIYE[1]) + ISLEM_HACIM).toFixed(6);
+				break;
+
+				case "SELL":
+					BAKIYE[0] = parseFloat(parseFloat(BAKIYE[0]) + (ISLEM_HACIM * price)).toFixed(2);
+					BAKIYE[1] = (parseFloat(BAKIYE[1]) - ISLEM_HACIM).toFixed(6);	
+				break;
+			}
+
+			BAKIYE[2] = (2000 + parseFloat(BAKIYE_BTC) * LAST_PRICE);
+			guncelBakiyeGuncelle(BAKIYE);
+			karZararHesapla();
+		}
+
+		function ortalamaHesapla(){
+			var total_buy 	= 0;
+			var total_sell 	= 0;
+			var amount_buy 	= 0;
+			var amount_sell	= 0;
+
+			var islemler 		= ISLEM_GECMISI;
+			islemler.forEach((v,k)=>{
+				if(v.type == "BUY"){
+					amount_buy += parseFloat(v.price);
+					total_buy++;
+				}else{
+					amount_sell += parseFloat(v.price);
+					total_sell++;
+				}
+			})
+
+			console.log(`ORTALAMA BUY : ${ amount_buy / total_buy} ||| ORTALAMA SELL : ${ amount_sell / total_sell }`);
+		}
+
+		function guncelBakiyeGuncelle(){
+			document.querySelector("#guncel_bakiye_fiat").innerHTML = BAKIYE[0];
+			document.querySelector("#guncel_bakiye_btc").innerHTML = BAKIYE[1];
+		}
+
+		function tum_emirleri_iptal_et(){
+			Highcharts.charts[0].yAxis[0].removePlotLine("sell_3");
+			Highcharts.charts[0].yAxis[0].removePlotLine("sell_2");
+			Highcharts.charts[0].yAxis[0].removePlotLine("sell_1");
+			Highcharts.charts[0].yAxis[0].removePlotLine("buy_1");
+			Highcharts.charts[0].yAxis[0].removePlotLine("buy_2");
+			Highcharts.charts[0].yAxis[0].removePlotLine("buy_3");
+			ACIK_EMIRLER = null;
+		}
+
+		function logger(type, price){
+			bakiyeGuncelle(type, price);
+			var tarih = new Date();
+			var islem_zamani = `${(tarih.getHours() < 10) ? "0"+tarih.getHours() : tarih.getHours()}:${(tarih.getMinutes() < 10) ? "0"+tarih.getMinutes() : tarih.getMinutes()}`;
+			var eskiIslemGecmisiTotal = document.querySelector("#islem_gecmisi_total").innerHTML;
+			var eskiIslemGecmisiBuy = document.querySelector("#islem_gecmisi_buy").innerHTML;
+			var eskiIslemGecmisiSell = document.querySelector("#islem_gecmisi_sell").innerHTML;
+			
+			document.querySelector("#islem_gecmisi_total").innerHTML = parseInt(eskiIslemGecmisiTotal) + 1;
+			var islemRow = {type, price, islem_zamani};
+			var islem_row = document.createElement("tr");
+			if(type == "BUY"){
+				islem_row.classList.add("table-success");
+				document.querySelector("#islem_gecmisi_buy").innerHTML = parseInt(eskiIslemGecmisiBuy) + 1;
+			}else{
+				islem_row.classList.add("table-danger");
+				document.querySelector("#islem_gecmisi_sell").innerHTML = parseInt(eskiIslemGecmisiSell) + 1;
+			}
+			islem_row.innerHTML = `<td>${islem_zamani}</td><td>${price}</td><td>${parseFloat(parseFloat(price) * ISLEM_HACIM).toFixed(2)}</td>`;
+			document.querySelector("#islem_gecmisi_list tbody").appendChild(islem_row);
+			ISLEM_GECMISI.push(islemRow);
+		}
+
+		function karZararHesapla(){
+			var karzarar = BAKIYE[2] - (parseFloat(BAKIYE[0]) + parseFloat(BAKIYE[1]) * LAST_PRICE);
+			document.querySelector("#karZarar").innerHTML = karzarar;
+		}
+	</script>
+
+</body>
+</html>
